@@ -41,6 +41,18 @@ function addMessage(text, type) {
   messages.scrollTop = messages.scrollHeight;
 }
 
+function addListMessage(title, items, instruction) {
+  const content = [
+    title,
+    "",
+    ...items.map((item, index) => `${index + 1}. ${item}`),
+    "",
+    instruction
+  ];
+
+  addMessage(content.join("\n"), "received");
+}
+
 async function iniciarReserva() {
   try {
     addMessage("Primero, seleccionemos el cliente para la reserva...", "received");
@@ -62,18 +74,11 @@ async function iniciarReserva() {
     booking.step = "client";
 
     addMessage("¿Para cuál cliente quieres agendar la cita?", "received");
-
-    clientes.forEach((cliente, index) => {
-      addMessage(
-        `${index + 1}. ${cliente.nombre} ${cliente.apellido}`,
-        "received"
-      );
-    });
-
-    addMessage(
-      "Escribe el número del cliente que deseas seleccionar.",
-      "received"
-    );
+    addListMessage(
+  " Clientes disponibles",
+  booking.clients.map(c => `${c.nombre} ${c.apellido}`),
+  "Escribe el número del cliente a simular."
+);
   } catch (error) {
     console.error(error);
     addMessage("No pude consultar los clientes. Inténtalo nuevamente.", "received");
@@ -102,7 +107,115 @@ form.addEventListener("submit", (event) => {
 async function handleBotMessage(text) {
   const message = text.toLowerCase();
 
+  // Consultar citas
+if (message.includes("mis citas")) {
+  try {
+    const response = await fetch("/api/clientes");
+
+    if (!response.ok) {
+      throw new Error("No se pudieron cargar los clientes.");
+    }
+
+    const resultado = await response.json();
+    booking.clients = resultado;
+
+    if (!Array.isArray(booking.clients) || booking.clients.length === 0) {
+      addMessage("No hay clientes registrados.", "received");
+      return;
+    }
+    booking.clientId = null;
+    booking.procedureId = null;
+    booking.professionalId = null;
+    booking.fecha = null;
+    booking.hora = null;
+    booking.procedures = [];
+    booking.professionals = [];
+    booking.horarios = [];
+    booking.step = "viewingAppointmentsClient";
+
+    addListMessage(
+      " ¿De quién quieres consultar las citas?",
+      booking.clients.map(c => `${c.nombre} ${c.apellido}`),
+      "Escribe el número del cliente."
+    );
+  } catch (error) {
+    console.error(error);
+    addMessage(
+      "No pude cargar los clientes. Inténtalo nuevamente.",
+      "received"
+    );
+  }
+
+  return;
+}
+
   // Selección del cliente durante una reserva.
+  
+if (booking.step === "viewingAppointmentsClient") {
+  const numero = Number(text.trim());
+
+  if (
+    !Number.isInteger(numero) ||
+    numero < 1 ||
+    numero > booking.clients.length
+  ) {
+    addMessage(
+      "Por favor, escribe un número válido de la lista.",
+      "received"
+    );
+    return;
+  }
+
+  const cliente = booking.clients[numero - 1];
+
+  try {
+    const response = await fetch("/api/citas");
+
+    if (!response.ok) {
+      throw new Error("No se pudieron consultar las citas.");
+    }
+
+    const citas = await response.json();
+
+    const citasCliente = citas.filter(
+  (cita) => cita.client?.id === cliente.id
+);
+
+    if (citasCliente.length === 0) {
+      addMessage(
+        ` ${cliente.nombre}, no encontramos citas registradas a tu nombre.`,
+        "received"
+      );
+      booking.step = "idle";
+      return;
+    }
+
+const items = citasCliente.map((cita, index) => {
+  return `${cita.procedure?.nombre ?? "No disponible"}
+  Fecha: ${cita.fecha}
+  encargado: ${cita.professional?.nombre ?? "no disponible"}
+  Hora: ${cita.hora}
+  Duración: ${cita.procedure?.duracion ?? "No disponible"} minutos
+  Estado: ${cita.estado}
+                                                                `;
+});
+
+addListMessage("Tus citas", items);
+    booking.step = "idle";
+  } catch (error) {
+    console.error(error);
+
+    addMessage(
+      "No pude consultar tus citas. Inténtalo nuevamente.",
+      "received"
+    );
+
+    booking.step = "idle";
+  }
+
+  return;
+}
+
   if (booking.step === "client") {
     const numero = Number(message.trim());
 
@@ -146,13 +259,12 @@ async function handleBotMessage(text) {
       booking.procedures = procedimientos;
 
       addMessage("Selecciona el procedimiento escribiendo su número:", "received");
-
-      procedimientos.forEach((procedimiento, index) => {
-        addMessage(
-          `${index + 1}. ${procedimiento.nombre}`,
-          "received"
-        );
-      });
+      
+      addListMessage(
+  " Procedimientos disponibles",
+  booking.procedures.map(p => `${p.nombre}`),
+  "Escribe el número del procedimiento que deseas."
+);
     } catch (error) {
       console.error(error);
       booking.step = "idle";
@@ -210,12 +322,10 @@ async function handleBotMessage(text) {
         "received"
       );
 
-      profesionales.forEach((profesional, index) => {
-        addMessage(
-          `${index + 1}. ${profesional.nombre} ${profesional.apellido}`,
-          "received"
-        );
-      });
+      addListMessage(
+  "Profesionales disponibles",
+  booking.professionals.map(p => `${p.nombre} ${p.apellido}`)
+);
     } catch (error) {
       console.error(error);
       booking.step = "idle";
@@ -344,14 +454,11 @@ async function handleBotMessage(text) {
         "received"
       );
 
-      horarios.forEach((hora, index) => {
-        addMessage(`${index + 1}. ${hora}`, "received");
-      });
-
-      addMessage(
-        "Escribe el número del horario que prefieres.",
-        "received"
-      );
+      addListMessage(
+  "Horarios disponibles",
+  horarios,
+  "Escribe el número del horario que prefieres."
+);
     } catch (error) {
       console.error(error);
 
@@ -482,59 +589,13 @@ async function handleBotMessage(text) {
 
     return;
   }
+  
   // Saludos
   if (message.includes("hola") || message.includes("buenas")) {
-    
-    try {
-      const response = await fetch("/api/citas", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          fecha: booking.fecha,
-          hora: booking.hora,
-          clientId: booking.clientId,
-          professionalId: booking.professionalId,
-          procedureId: booking.procedureId
-        })
-      });
-
-      const resultado = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          resultado.error ||
-          resultado.mensaje ||
-          "No se pudo crear la cita."
-        );
-      }
-
-      addMessage(
-        resultado.mensaje || "¡Cita creada correctamente en Firebase!",
-        "received"
-      );
-
-      // Limpiamos el estado de la reserva.
-      booking.step = "idle";
-      booking.clientId = null;
-      booking.procedureId = null;
-      booking.professionalId = null;
-      booking.fecha = null;
-      booking.hora = null;
-      booking.procedures = [];
-      booking.professionals = [];
-      booking.clients = [];
-      booking.horarios = [];
-    } catch (error) {
-      console.error(error);
-
-      addMessage(
-        `No se pudo guardar la cita: ${error.message}. Puedes intentarlo nuevamente escribiendo "confirmar".`,
-        "received"
-      );
-    }
-
+    addMessage(
+      "¡Hola!  ¿En qué puedo ayudarte? Puedes agendar una cita, revisar tus citas o consultar los procedimientos disponibles.",
+      "received"
+    );
     return;
   }
 
@@ -585,14 +646,7 @@ async function handleBotMessage(text) {
     await iniciarReserva();
     return;
   }
-  // Consultar citas
-  if (message.includes("mis citas") || message.includes("revisar mis citas")) {
-    addMessage(
-      "Para consultar tus citas, primero necesitaremos identificarte. Esa función la conectaremos en el siguiente paso.",
-      "received"
-    );
-    return;
-  }
+
 
   // Respuesta por defecto
   addMessage(

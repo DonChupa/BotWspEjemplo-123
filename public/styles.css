@@ -228,6 +228,7 @@ button {
   align-self: flex-start;
   background: white;
   border-top-left-radius: 2px;
+  white-space: pre-line;
 }
 
 .sent {
