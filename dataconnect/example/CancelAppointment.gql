@@ -1,0 +1,10 @@
+
+mutation CancelAppointment($id: UUID!)
+@auth(level: NO_ACCESS) {
+  appointment_update(
+    id: $id
+    data: {
+      estado: "CANCELADA"
+    }
+  )
+}

@@ -1,0 +1,9 @@
+query ListProfessionals @auth(level: NO_ACCESS) {
+  professionals {
+    id
+    rut
+    nombre
+    apellido
+    especialidad
+  }
+}

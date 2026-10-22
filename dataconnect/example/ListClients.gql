@@ -1,0 +1,10 @@
+query ListClients @auth(level: NO_ACCESS) {
+  clients {
+    id
+    rut
+    nombre
+    apellido
+    telefono
+    correo
+  }
+}

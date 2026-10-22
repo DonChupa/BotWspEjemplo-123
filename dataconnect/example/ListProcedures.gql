@@ -1,0 +1,9 @@
+query ListProcedures @auth(level: NO_ACCESS) {
+  procedures {
+    id
+    nombre
+    descripcion
+    precio
+    duracion
+  }
+}

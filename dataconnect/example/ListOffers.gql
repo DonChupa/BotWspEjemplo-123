@@ -1,0 +1,9 @@
+query ListOffers @auth(level: NO_ACCESS) {
+  offers {
+    id
+    nombre
+    descuento
+    fechaInicio
+    fechaFin
+  }
+}

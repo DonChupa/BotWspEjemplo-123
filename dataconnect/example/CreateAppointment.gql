@@ -1,0 +1,20 @@
+
+mutation CreateAppointment(
+  $fecha: Date!
+  $hora: String!
+  $estado: String!
+  $clientId: UUID!
+  $professionalId: UUID!
+  $procedureId: UUID!
+) @auth(level: NO_ACCESS) {
+  appointment_insert(
+    data: {
+      fecha: $fecha
+      hora: $hora
+      estado: $estado
+      clientId: $clientId
+      professionalId: $professionalId
+      procedureId: $procedureId
+    }
+  )
+}

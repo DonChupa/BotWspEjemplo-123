@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador WhatsApp | Bot de citas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <header class="sidebar-header">
+        <h1>Simulador</h1>
+        <span class="status">● Local</span>
+      </header>
+
+      <section class="profile">
+        <div class="avatar bot-avatar">B</div>
+        <div>
+          <h2>Bot de citas</h2>
+          <p>Asistente virtual</p>
+        </div>
+      </section>
+
+      <section class="sidebar-info">
+        <h3>Panel de prueba</h3>
+        <p>Simula una conversación con tu bot antes de conectarlo a WhatsApp.</p>
+
+        <div class="info-card">
+          <span>Estado</span>
+          <strong>En desarrollo</strong>
+        </div>
+
+        <div class="info-card">
+          <span>Base de datos</span>
+          <strong>Firebase Data Connect</strong>
+        </div>
+      </section>
+    </aside>
+
+    <section class="chat">
+      <header class="chat-header">
+        <div class="avatar bot-avatar">B</div>
+        <div class="chat-contact">
+          <h2>Bot de citas</h2>
+          <p>Asistente virtual · Simulación local</p>
+        </div>
+        <span class="chat-badge">PROTOTIPO</span>
+      </header>
+
+      <div id="messages" class="messages">
+        <div class="date-divider">
+          <span>Hoy</span>
+        </div>
+
+        <div class="message received">
+          <p>¡Hola! 👋 Soy tu asistente virtual.</p>
+          <p>¿En qué puedo ayudarte?</p>
+          <time>Ahora</time>
+        </div>
+
+        <div class="message received">
+          <p>Puedes escribirme o probar una de las opciones disponibles.</p>
+          <time>Ahora</time>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button type="button" data-message="Quiero agendar una cita">
+          📅 Agendar cita
+        </button>
+        <button type="button" data-message="Quiero revisar mis citas">
+          🗓️ Mis citas
+        </button>
+        <button type="button" data-message="Quiero ver los procedimientos">
+          ✂️ Procedimientos
+        </button>
+      </div>
+
+      <form id="message-form" class="composer">
+        <input
+          id="message-input"
+          type="text"
+          placeholder="Escribe un mensaje..."
+          autocomplete="off"
+          aria-label="Mensaje"
+        >
+        <button type="submit" aria-label="Enviar mensaje">➤</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

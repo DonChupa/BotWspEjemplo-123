@@ -1,0 +1,42 @@
+type Client @table {
+  rut: String!
+  nombre: String!
+  apellido: String!
+  telefono: Int!
+  correo: String
+}
+
+type Professional @table {
+  rut: String!
+  nombre: String!
+  apellido: String!
+  especialidad: String!
+}
+
+type Procedure @table {
+  nombre: String!
+  descripcion: String!
+  precio: Int!
+  duracion: Int!
+}
+
+type Offer @table {
+  nombre: String!
+  descuento: Float!
+  fechaInicio: Date!
+  fechaFin: Date
+}
+
+type OfferProcedure @table(key: ["offer", "procedure"]) {
+  offer: Offer!
+  procedure: Procedure!
+}
+
+type Appointment @table {
+  fecha: Date!
+  hora: Int!
+  estado: String!
+  client: Client!
+  professional: Professional!
+  procedure: Procedure!
+}

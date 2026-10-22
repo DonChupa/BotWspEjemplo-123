@@ -1,0 +1,26 @@
+query ListAppointments @auth(level: NO_ACCESS) {
+  appointments {
+    id
+    fecha
+    hora
+    estado
+    client {
+      id
+      rut
+      nombre
+      apellido
+    }
+    professional {
+      id
+      nombre
+      apellido
+      especialidad
+    }
+    procedure {
+      id
+      nombre
+      precio
+      duracion
+    }
+  }
+}
